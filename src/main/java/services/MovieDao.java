@@ -1,16 +1,15 @@
 package services;
 
 import models.Movie;
+import data.MovieArray;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MovieDao {
     private static final String MOVIES_FILE = "data/movies.txt";
     private static final String DELIMITER = "|";
 
-    public static List<Movie> getAllMovies() {
-        List<Movie> movies = new ArrayList<>();
+    public static Movie[] getAllMovies() {
+        MovieArray movies = new MovieArray();
         try {
             File file = new File(MOVIES_FILE);
             if (!file.exists()) {
@@ -51,11 +50,11 @@ public class MovieDao {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return movies;
+        return movies.toArray();
     }
 
     public static void updateMovie(String movieId, String title, String genre, int rating, String description, boolean available) {
-        List<Movie> movies = getAllMovies();
+        Movie[] movies = getAllMovies();
         try {
             File file = new File(MOVIES_FILE);
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
@@ -91,24 +90,13 @@ public class MovieDao {
         }
     }
 
-    public static List<Movie> searchMovies(String query) {
-        if (query == null || query.trim().isEmpty()) {
-            return getAllMovies();
-        }
-        
-        String searchTerm = query.toLowerCase().trim();
-        List<Movie> allMovies = getAllMovies();
-        List<Movie> searchResults = new ArrayList<>();
-        
+    public static Movie[] searchMovies(String query) {
+        MovieArray movies = new MovieArray();
+        Movie[] allMovies = getAllMovies();
         for (Movie movie : allMovies) {
-            if (movie.getTitle().toLowerCase().contains(searchTerm) ||
-                movie.getGenre().toLowerCase().contains(searchTerm) ||
-                movie.getDescription().toLowerCase().contains(searchTerm)) {
-                searchResults.add(movie);
-            }
+            movies.add(movie);
         }
-        
-        return searchResults;
+        return movies.search(query);
     }
 
     public void addMovie(Movie movie) {
@@ -138,7 +126,7 @@ public class MovieDao {
     }
 
     public static void updateMovie(Movie movie) {
-        List<Movie> movies = getAllMovies();
+        Movie[] movies = getAllMovies();
         try {
             File file = new File(MOVIES_FILE);
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
@@ -165,7 +153,7 @@ public class MovieDao {
     }
 
     public static void deleteMovie(String movieId) {
-        List<Movie> movies = getAllMovies();
+        Movie[] movies = getAllMovies();
         try {
             File file = new File(MOVIES_FILE);
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
@@ -191,14 +179,17 @@ public class MovieDao {
     }
 
     public static Movie getMovieById(String movieId) {
-        return getAllMovies().stream()
-                .filter(movie -> movie.getMovieId().equals(movieId))
-                .findFirst()
-                .orElse(null);
+        Movie[] movies = getAllMovies();
+        for (Movie movie : movies) {
+            if (movie.getMovieId().equals(movieId)) {
+                return movie;
+            }
+        }
+        return null;
     }
 
     public void toggleAvailability(String movieId) {
-        List<Movie> movies = getAllMovies();
+        Movie[] movies = getAllMovies();
         try {
             File file = new File(MOVIES_FILE);
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
