@@ -1,0 +1,1 @@
+paymentId,rentalId,userId,amount,status,paymentDate,Credit card
