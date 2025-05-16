@@ -128,12 +128,9 @@
                         </button>
                     </div>
                 </div>
-                <select id="sortType" onchange="sortMovies()" class="bg-secondary hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
-                    <option value="">Sort by...</option>
-                    <option value="rating">Rating (High to Low)</option>
-                    <option value="title">Title (A-Z)</option>
-                    <option value="genre">Genre (A-Z)</option>
-                </select>
+                <a href="?sortByRating=true" class="bg-secondary hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center">
+                    <i class="fas fa-sort-numeric-down mr-2"></i>Sort by Rating
+                </a>
             </div>
 
             <!-- Messages -->
