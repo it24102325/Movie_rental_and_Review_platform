@@ -5,7 +5,7 @@ import data.MovieArray;
 import java.io.*;
 
 public class MovieDao {
-    private static final String MOVIES_FILE = "data/movies.txt";
+    private static final String MOVIES_FILE = "C:\\Users\\theni\\Desktop\\movie-management\\src\\main\\webapp\\WEB-INF\\data\\movies.txt";
     private static final String DELIMITER = "|";
 
     public static Movie[] getAllMovies() {
