@@ -2,6 +2,7 @@ package data;
 
 import models.Movie;
 
+//create new array class for storing data
 public class MovieArray {
     private Movie[] movies;
     private int size;
