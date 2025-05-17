@@ -1,6 +1,7 @@
 package models;
 
 public class AdminUser extends User {
+    //admin attributes
     private String adminLevel;
     private String[] permissions;
     private boolean active;
