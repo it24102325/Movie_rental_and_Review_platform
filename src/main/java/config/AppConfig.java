@@ -30,13 +30,13 @@ public class AppConfig {
             }
 
             // Print all file paths
-            System.out.println("Reviews file: " + REVIEWS_FILE);
-            System.out.println("Movies file: " + MOVIES_FILE);
-            System.out.println("Rentals file: " + RENTALS_FILE);
-            System.out.println("Users file: " + USERS_FILE);
-            System.out.println("Payments file: " + PAYMENTS_FILE);
-            System.out.println("Admins file: " + ADMINS_FILE);
-            System.out.println("Admin logs file: " + ADMIN_LOGS_FILE);
+            System.out.println("Reviews files: " + REVIEWS_FILE);
+            System.out.println("Movies files: " + MOVIES_FILE);
+            System.out.println("Rentals files: " + RENTALS_FILE);
+            System.out.println("Users files: " + USERS_FILE);
+            System.out.println("Payments files: " + PAYMENTS_FILE);
+            System.out.println("Admins files: " + ADMINS_FILE);
+            System.out.println("Admin logs files: " + ADMIN_LOGS_FILE);
         } catch (Exception e) {
             System.err.println("Error in AppConfig initialization: " + e.getMessage());
             e.printStackTrace();
