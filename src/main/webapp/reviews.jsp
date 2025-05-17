@@ -23,9 +23,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reviews - Cineverse</title>
-    <link rel="stylesheet" href="assets/styles/index.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/styles/shared.css">
+    <style>
+        /* Add any reviews-specific styles here */
+    </style>
 </head>
 <body>
 <header class="site-header">
@@ -114,9 +117,15 @@
     </div>
 
     <div class="reviews-container">
+        <div class="reviews-header">
+            <h2>All Reviews</h2>
+            <button onclick="sortReviewsByRating()" class="btn btn-primary">
+                <span class="material-icons">sort</span> Sort by Rating
+            </button>
+        </div>
         <% if (reviews != null && !reviews.isEmpty()) { %>
             <% for (Review review : reviews) { %>
-                <div class="review-card">
+                <div class="review-card" data-rating="<%= review.getRatingAsInt() %>">
                     <div class="review-header">
                         <h3><%= java.util.Arrays.stream(MovieDao.getAllMovies())
                             .filter(m -> m.getMovieId().equals(review.getMovieId()))
@@ -683,6 +692,40 @@
     .form-group textarea:valid {
         border-color: #2ecc71;
     }
+
+    .reviews-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 0 1rem;
+    }
+
+    .reviews-header h2 {
+        margin: 0;
+        color: #2c3e50;
+    }
+
+    .reviews-header .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    .reviews-header .btn:hover {
+        background: #2980b9;
+    }
+
+    .reviews-header .material-icons {
+        font-size: 1.2rem;
+    }
 </style>
 
 <div id="toast" class="toast"></div>
@@ -854,6 +897,27 @@
 
     // Call initialization when document is ready
     document.addEventListener('DOMContentLoaded', initializeStarRatings);
+
+    function bubbleSort(reviews) {
+        const n = reviews.length;
+        for (let i = 0; i < n - 1; i++) {
+            for (let j = 0; j < n - i - 1; j++) {
+                const rating1 = parseInt(reviews[j].getAttribute('data-rating'));
+                const rating2 = parseInt(reviews[j + 1].getAttribute('data-rating'));
+                if (rating1 < rating2) {
+                    // Swap the elements
+                    reviews[j].parentNode.insertBefore(reviews[j + 1], reviews[j]);
+                }
+            }
+        }
+    }
+
+    function sortReviewsByRating() {
+        const reviewsContainer = document.querySelector('.reviews-container');
+        const reviews = Array.from(reviewsContainer.getElementsByClassName('review-card'));
+        bubbleSort(reviews);
+    }
 </script>
+<script src="assets/js/shared.js"></script>
 </body>
 </html>
