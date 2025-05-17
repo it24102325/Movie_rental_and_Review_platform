@@ -1,6 +1,7 @@
 package models;
 
 public class Review {
+    //review attributes
     private String reviewId;
     private String userId;
     private String movieId;
