@@ -398,7 +398,7 @@
         }
 
         function deleteMovie(movieId) {
-            if (confirm('Are you sure you want to delete this movie?')) {
+            if (confirm('Are you sure you want to delete this movie ?')) {
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = 'delete-movie';
