@@ -1,0 +1,16 @@
+body {
+    background-color: #fff;
+    font-family: Arial, sans-serif;
+}
+
+h2 {
+    margin-bottom: 20px;
+}
+
+label {
+    font-weight: 600;
+}
+
+textarea {
+    resize: vertical;
+}
