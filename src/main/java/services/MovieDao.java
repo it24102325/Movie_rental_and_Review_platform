@@ -1,217 +1,257 @@
 package services;
 
 import models.Movie;
-import data.MovieArray;
+import models.Review;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class MovieDao {
-    private static final String MOVIES_FILE = "C:\\Users\\theni\\Desktop\\movie-management\\src\\main\\webapp\\WEB-INF\\data\\movies.txt";
-    private static final String DELIMITER = "|";
+    // Path to movies' data file
+    private static final String filePath = "C:\\Users\\theni\\Downloads\\movie rental platform\\jacka (1)\\movie_rental_and_review_platform_05\\data\\movies.txt";
 
-    public static Movie[] getAllMovies() {
-        MovieArray movies = new MovieArray();
-        try {
-            File file = new File(MOVIES_FILE);
-            if (!file.exists()) {
-                file.getParentFile().mkdirs();
-                file.createNewFile();
+    static {
+        // Create data directory if it doesn't exist
+        File dataDir = new File("C:\\Users\\theni\\Downloads\\movie rental platform\\jacka (1)\\movie_rental_and_review_platform_05\\data\\movies.txt");
+        if (!dataDir.exists()) {
+            dataDir.mkdirs();
+        }
+        
+        // Create movies.txt if it doesn't exist
+        File moviesFile = new File(filePath);
+        if (!moviesFile.exists()) {
+            try {
+                moviesFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+        }
+    }
 
-            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                String line;
-                int id = 1;
-                while ((line = reader.readLine()) != null) {
-                    if (!line.trim().isEmpty()) {
-                        String[] parts = line.split("\\" + DELIMITER);
-                        if (parts.length >= 5) {
-                            try {
-                                String title = parts[0].trim();
-                                String description = parts[3].trim();
-                                
-                                // Only add movies that have been properly added (have a title and description)
-                                if (!title.isEmpty() && !description.isEmpty()) {
-                                    Movie movie = new Movie();
-                                    movie.setMovieId(String.valueOf(id++));
-                                    movie.setTitle(title);
-                                    movie.setGenre(parts[1].trim());
-                                    movie.setRating(Integer.parseInt(parts[2].trim()));
-                                    movie.setDescription(description);
-                                    movie.setAvailable(Boolean.parseBoolean(parts[4].trim()));
-                                    movies.add(movie);
-                                }
-                            } catch (NumberFormatException e) {
-                                System.err.println("Error parsing movie data: " + line);
-                                e.printStackTrace();
+    // Add a new movie
+    public static void addMovie(String title, String genre, String description, String imageFileName, double price) {
+        String movieId = "M" + System.currentTimeMillis();
+        Movie movie = new Movie(movieId, title, genre, description, imageFileName, price);
+        saveMovie(movie);
+    }
+
+    // Save movie to file
+    private static void saveMovie(Movie movie) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
+            writer.write(movie.toFileFormat());
+            writer.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Get all movies from the file
+    public static List<Movie> getAllMovies() {
+        List<Movie> movies = new ArrayList<>();
+        File moviesFile = new File(filePath);
+        
+        if (!moviesFile.exists()) {
+            System.err.println("Error: movies.txt does not exist at: " + filePath);
+            return movies;
+        }
+        
+        if (moviesFile.length() == 0) {
+            System.out.println("Warning: movies.txt is empty");
+            return movies;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            System.out.println("Reading movies from file: " + filePath);
+            String line;
+            int lineNumber = 0;
+            
+            while ((line = reader.readLine()) != null) {
+                lineNumber++;
+                System.out.println("Reading line " + lineNumber + ": " + line);
+                
+                if (line.trim().isEmpty()) {
+                    System.out.println("Skipping empty line " + lineNumber);
+                    continue;
+                }
+                
+                String[] movieData = line.split(",");
+                System.out.println("Line " + lineNumber + " has " + movieData.length + " fields");
+                
+                if (movieData.length >= 4) {
+                    try {
+                        // Format: movieId,title,genre,description,posterPath,price
+                        String movieId = movieData[0].trim();
+                        String title = movieData[1].trim();
+                        String genre = movieData[2].trim();
+                        String description = movieData[3].trim();
+                        String imageFileName = "";
+                        double price = 0.0;
+                        
+                        // Handle image file name if it exists
+                        if (movieData.length > 4) {
+                            imageFileName = movieData[4].trim();
+                            // Remove any path prefixes if they exist
+                            if (imageFileName.contains("/")) {
+                                imageFileName = imageFileName.substring(imageFileName.lastIndexOf("/") + 1);
                             }
                         }
+                        
+                        // Handle price if it exists
+                        if (movieData.length > 5) {
+                            try {
+                                price = Double.parseDouble(movieData[5].trim());
+                            } catch (NumberFormatException e) {
+                                System.err.println("Invalid price format at line " + lineNumber + ": " + movieData[5]);
+                            }
+                        }
+                        
+                        Movie movie = new Movie(movieId, title, genre, description, imageFileName, price);
+                        System.out.println("Created movie object: " + movie.getTitle() + 
+                                         ", Image: " + movie.getImageFileName() + 
+                                         ", Price: " + movie.getPrice());
+                        movies.add(movie);
+                    } catch (Exception e) {
+                        System.err.println("Error processing movie at line " + lineNumber + ": " + e.getMessage());
                     }
+                } else {
+                    System.err.println("Invalid movie data format at line " + lineNumber + 
+                                     ". Expected at least 4 fields, got " + movieData.length);
                 }
             }
+            System.out.println("Total movies loaded: " + movies.size());
         } catch (IOException e) {
+            System.err.println("Error reading movies file: " + e.getMessage());
             e.printStackTrace();
         }
-        return movies.toArray();
+        return movies;
     }
 
-    public static void updateMovie(String movieId, String title, String genre, int rating, String description, boolean available) {
-        Movie[] movies = getAllMovies();
-        try {
-            File file = new File(MOVIES_FILE);
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                for (Movie movie : movies) {
-                    if (movie.getMovieId().equals(movieId)) {
-                        // Update the movie with new values
-                        String movieData = String.join(DELIMITER,
-                                title,
-                                genre,
-                                String.valueOf(rating),
-                                description,
-                                String.valueOf(available)
-                        );
-                        writer.write(movieData);
-                    } else {
-                        // Write the existing movie data
-                        String movieData = String.join(DELIMITER,
-                                movie.getTitle(),
-                                movie.getGenre(),
-                                String.valueOf(movie.getRating()),
-                                movie.getDescription(),
-                                String.valueOf(movie.isAvailable())
-                        );
-                        writer.write(movieData);
-                    }
-                    writer.newLine();
-                }
-                writer.flush();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to update movie: " + e.getMessage());
-        }
-    }
-
-    public static Movie[] searchMovies(String query) {
-        MovieArray movies = new MovieArray();
-        Movie[] allMovies = getAllMovies();
-        for (Movie movie : allMovies) {
-            movies.add(movie);
-        }
-        return movies.search(query);
-    }
-
-    public void addMovie(Movie movie) {
-        try {
-            File file = new File(MOVIES_FILE);
-            if (!file.exists()) {
-                file.getParentFile().mkdirs();
-                file.createNewFile();
-            }
-
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-                String movieData = String.join(DELIMITER,
-                        movie.getTitle(),
-                        movie.getGenre(),
-                        String.valueOf(movie.getRating()),
-                        movie.getDescription(),
-                        String.valueOf(movie.isAvailable())
-                );
-                writer.write(movieData);
-                writer.newLine();
-                writer.flush();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to add movie: " + e.getMessage());
-        }
-    }
-
-    public static void updateMovie(Movie movie) {
-        Movie[] movies = getAllMovies();
-        try {
-            File file = new File(MOVIES_FILE);
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                for (Movie m : movies) {
-                    if (m.getMovieId().equals(movie.getMovieId())) {
-                        m = movie;
-                    }
-                    String movieData = String.join(DELIMITER,
-                            m.getTitle(),
-                            m.getGenre(),
-                            String.valueOf(m.getRating()),
-                            m.getDescription(),
-                            String.valueOf(m.isAvailable())
-                    );
-                    writer.write(movieData);
-                    writer.newLine();
-                }
-                writer.flush();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to update movie: " + e.getMessage());
-        }
-    }
-
-    public static void deleteMovie(String movieId) {
-        Movie[] movies = getAllMovies();
-        try {
-            File file = new File(MOVIES_FILE);
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                for (Movie movie : movies) {
-                    if (!movie.getMovieId().equals(movieId)) {
-                        String movieData = String.join(DELIMITER,
-                                movie.getTitle(),
-                                movie.getGenre(),
-                                String.valueOf(movie.getRating()),
-                                movie.getDescription(),
-                                String.valueOf(movie.isAvailable())
-                        );
-                        writer.write(movieData);
-                        writer.newLine();
-                    }
-                }
-                writer.flush();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to delete movie: " + e.getMessage());
-        }
-    }
-
-    public static Movie getMovieById(String movieId) {
-        Movie[] movies = getAllMovies();
+    // Get a movie by ID
+    public static Movie getMovieById(String id) {
+        List<Movie> movies = getAllMovies();
         for (Movie movie : movies) {
-            if (movie.getMovieId().equals(movieId)) {
+            if (movie.getId().equals(id)) {
                 return movie;
             }
         }
         return null;
     }
 
-    public void toggleAvailability(String movieId) {
-        Movie[] movies = getAllMovies();
-        try {
-            File file = new File(MOVIES_FILE);
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                for (Movie movie : movies) {
-                    if (movie.getMovieId().equals(movieId)) {
-                        movie.setAvailable(!movie.isAvailable());
-                    }
-                    String movieData = String.join(DELIMITER,
-                            movie.getTitle(),
-                            movie.getGenre(),
-                            String.valueOf(movie.getRating()),
-                            movie.getDescription(),
-                            String.valueOf(movie.isAvailable())
-                    );
-                    writer.write(movieData);
-                    writer.newLine();
+    // Search movies by keyword in title or genre
+    public static List<Movie> searchMovies(String keyword) {
+        List<Movie> movies = new ArrayList<>();
+        if (keyword == null) keyword = "";
+        keyword = keyword.toLowerCase();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                Movie movie = Movie.fromFileFormat(line);
+                if (movie.getTitle().toLowerCase().contains(keyword) || movie.getGenre().toLowerCase().contains(keyword)) {
+                    movies.add(movie);
                 }
-                writer.flush();
             }
         } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException("Failed to toggle movie availability: " + e.getMessage());
         }
+        return movies;
+    }
+
+    // Update a movie
+    public static void updateMovie(String id, String title, String genre, String description, String imageFileName, double price) throws IOException {
+        List<Movie> movies = getAllMovies();
+        boolean found = false;
+        
+        for (Movie movie : movies) {
+            if (movie.getId().equals(id)) {
+                movie.setTitle(title);
+                movie.setGenre(genre);
+                movie.setDescription(description);
+                movie.setImageFileName(imageFileName);
+                movie.setPrice(price);
+                found = true;
+                break;
+            }
+        }
+        
+        if (!found) {
+            throw new IOException("Movie not found with ID: " + id);
+        }
+        
+        // Write updated movies back to file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            for (Movie movie : movies) {
+                writer.write(String.format("%s,%s,%s,%s,%s,%.2f\n",
+                    movie.getId(),
+                    movie.getTitle(),
+                    movie.getGenre(),
+                    movie.getDescription(),
+                    movie.getImageFileName(),
+                    movie.getPrice()));
+            }
+        }
+    }
+
+    // Delete a movie
+    public static void deleteMovie(String movieId) {
+        List<String> movies = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                Movie movie = Movie.fromFileFormat(line);
+                if (!movie.getMovieId().equals(movieId)) {
+                    movies.add(line);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false))) {
+            for (String movie : movies) {
+                writer.write(movie);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Calculate average rating for a movie
+    public static double getAverageRating(String movieId) {
+        List<Review> reviews = ReviewDao.getReviewsForMovie(movieId);
+        if (reviews.isEmpty()) {
+            return 0.0;
+        }
+        
+        double sum = 0.0;
+        for (Review review : reviews) {
+            sum += Double.parseDouble(review.getRating());
+        }
+        return sum / reviews.size();
+    }
+
+    // Get movies sorted by rating
+    public static List<Movie> getMoviesSortedByRating(boolean ascending) {
+        List<Movie> movies = getAllMovies();
+        Map<String, Double> movieRatings = new HashMap<>();
+        
+        // Calculate average rating for each movie
+        for (Movie movie : movies) {
+            movieRatings.put(movie.getId(), getAverageRating(movie.getId()));
+        }
+        
+        // Sort movies based on their average ratings
+        movies.sort((m1, m2) -> {
+            double rating1 = movieRatings.get(m1.getId());
+            double rating2 = movieRatings.get(m2.getId());
+            return ascending ? 
+                   Double.compare(rating1, rating2) : 
+                   Double.compare(rating2, rating1);
+        });
+        
+        return movies;
     }
 }

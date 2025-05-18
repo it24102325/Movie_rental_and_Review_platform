@@ -1,4 +1,3 @@
-/* Import Google Font */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
 * {
@@ -11,16 +10,15 @@
 body {
     height: 100vh;
     display: flex;
-    flex-direction: column; /* Align elements vertically */
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-image: url('../images/login_img/login_bg.jpg'); /* Make sure this path is correct */
+    background-image: url('../images/login_img/login_bg.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
 }
 
-/* Dark overlay */
 .hero {
     position: absolute;
     width: 100%;
@@ -30,7 +28,6 @@ body {
     left: 0;
 }
 
-/* Logo styling */
 .logo {
     font-size: 32px;
     font-weight: 700;
@@ -45,13 +42,12 @@ body {
     color: #ff4757;
 }
 
-/* Glassmorphism Login Container */
 .wrapper {
     position: relative;
     z-index: 1;
     width: 350px;
     padding: 40px;
-    background: rgba(255, 255, 255, 0.1); /* Glass effect */
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 15px;
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(10px);
@@ -64,7 +60,6 @@ h2 {
     margin-bottom: 20px;
 }
 
-/* Input Fields */
 .input-field {
     position: relative;
     margin-bottom: 20px;
@@ -91,7 +86,6 @@ h2 {
     transition: 0.3s;
 }
 
-/* Animation for Labels */
 .input-field input:focus ~ label,
 .input-field input:valid ~ label {
     top: 5px;
@@ -99,27 +93,6 @@ h2 {
     color: white;
 }
 
-/* Remember Me & Forgot Password */
-.forget {
-    display: flex;
-    justify-content: space-between;
-    font-size: 14px;
-}
-
-.forget input {
-    margin-right: 5px;
-}
-
-.forget a {
-    color: white;
-    text-decoration: none;
-}
-
-.forget a:hover {
-    text-decoration: underline;
-}
-
-/* Login Button */
 button {
     width: 100%;
     padding: 10px;
@@ -136,7 +109,6 @@ button:hover {
     background: #e84118;
 }
 
-/* Register Link */
 .register {
     margin-top: 15px;
 }
@@ -148,4 +120,13 @@ button:hover {
 
 .register a:hover {
     text-decoration: underline;
+}
+
+.error-message {
+    background: rgba(255, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    color: #ff6b6b;
+    font-weight: 500;
 }

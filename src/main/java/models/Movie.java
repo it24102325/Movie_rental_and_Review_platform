@@ -1,122 +1,80 @@
 package models;
 
-/**
- * Represents a movie in the rental system.
- * This class contains the basic attributes and behaviors of a movie.
- */
 public class Movie {
-    // Unique identifier for the movie
     private String movieId;
-    // Title of the movie
     private String title;
-    // Genre/category of the movie (e.g., Action, Drama, Comedy)
     private String genre;
-    // Rating of the movie (0-9)
-    private int rating;
-    // Brief description of the movie's plot
     private String description;
-    // Flag indicating if the movie is available for rental
-    private boolean available;
-    // URL for the movie's poster image
-    private String posterUrl;
+    private String imageFileName;  // stores uploaded image filename
+    private double price;  // stores movie rental price
 
-    // Getters and Setters with documentation
-    /**
-     * @return The unique identifier of the movie
-     */
+    public Movie(String movieId, String title, String genre, String description, String imageFileName, double price) {
+        this.movieId = movieId;
+        this.title = title;
+        this.genre = genre;
+        this.description = description;
+        this.imageFileName = imageFileName;
+        this.price = price;
+    }
+
+    // Getters and setters
     public String getMovieId() {
         return movieId;
     }
-
-    /**
-     * @param movieId The unique identifier to set
-     */
     public void setMovieId(String movieId) {
         this.movieId = movieId;
     }
 
-    /**
-     * @return The title of the movie
-     */
     public String getTitle() {
         return title;
     }
-
-    /**
-     * @param title The title to set
-     */
     public void setTitle(String title) {
         this.title = title;
     }
 
-    /**
-     * @return The genre of the movie
-     */
     public String getGenre() {
         return genre;
     }
-
-    /**
-     * @param genre The genre to set
-     */
     public void setGenre(String genre) {
         this.genre = genre;
     }
 
-    /**
-     * @return The rating of the movie (0-9)
-     */
-    public int getRating() {
-        return rating;
-    }
-
-    /**
-     * Sets the movie rating, ensuring it stays within the valid range (0-9)
-     * @param rating The rating to set
-     */
-    public void setRating(int rating) {
-        this.rating = Math.max(0, Math.min(9, rating));
-    }
-
-    /**
-     * @return The description of the movie
-     */
     public String getDescription() {
         return description;
     }
-
-    /**
-     * @param description The description to set
-     */
     public void setDescription(String description) {
         this.description = description;
     }
 
-    /**
-     * @return Whether the movie is available for rental
-     */
-    public boolean isAvailable() {
-        return available;
+    public String getImageFileName() {
+        return imageFileName;
+    }
+    public void setImageFileName(String imageFileName) {
+        this.imageFileName = imageFileName;
     }
 
-    /**
-     * @param available The availability status to set
-     */
-    public void setAvailable(boolean available) {
-        this.available = available;
+    public double getPrice() {
+        return price;
+    }
+    public void setPrice(double price) {
+        this.price = price;
     }
 
-    /**
-     * @return The URL of the movie's poster image
-     */
-    public String getPosterUrl() {
-        return posterUrl;
+    public String getId() {
+        return movieId;
     }
 
-    /**
-     * @param posterUrl The URL of the movie's poster image to set
-     */
-    public void setPosterUrl(String posterUrl) {
-        this.posterUrl = posterUrl;
+    // Format movie object as CSV line for storage
+    public String toFileFormat() {
+        return movieId + "," + title + "," + genre + "," + description + "," + 
+               (imageFileName == null ? "" : imageFileName) + "," + price;
     }
-} 
+
+    // Parse CSV line to Movie object
+    public static Movie fromFileFormat(String line) {
+        String[] parts = line.split(",", 6); // limit 6 parts to handle commas in description safely
+        String image = parts.length > 4 ? parts[4] : "";
+        double price = parts.length > 5 ? Double.parseDouble(parts[5]) : 0.0;
+        return new Movie(parts[0], parts[1], parts[2], parts[3], image, price);
+    }
+}

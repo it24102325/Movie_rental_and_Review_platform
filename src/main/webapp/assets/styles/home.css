@@ -1,180 +1,164 @@
-/* General Page Styling */
-body {
-    font-family: 'Poppins', sans-serif;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+* {
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
 }
-
-/* Navbar Styling */
-.navbar {
-    background-color: #333;
-    color: #fff;
-    padding: 15px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-}
-
-.navbar .logo {
-    font-size: 24px;
-    font-weight: 700;
-    color: #fff;
-    text-decoration: none;
-}
-
-.navbar .logo span {
-    color: #007BFF;
-}
-
-.navbar .menu-links {
-    list-style: none;
-    display: flex;
-    gap: 20px;
-}
-
-.navbar .menu-links li a {
-    color: #fff;
-    text-decoration: none;
-    font-size: 16px;
-    transition: color 0.3s;
-}
-
-.navbar .menu-links li a:hover {
-    color: #007BFF;
-}
-
-/* Hero Section */
-.hero-section {
-    background: url('../images/index_img/bg.jpg') no-repeat center center/cover;
-    color: white;
-    text-align: center;
-    padding: 80px 20px;
-}
-
-.hero-section h2 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-}
-
-.hero-section form {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-}
-
-.hero-section input {
-    padding: 10px;
-    font-size: 16px;
-    border: none;
-    border-radius: 5px;
-}
-
-.hero-section .search-btn {
-    padding: 10px 15px;
-    border: none;
-    background: #007BFF;
-    color: white;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: 0.3s;
-}
-
-.hero-section .search-btn:hover {
-    background: #0056b3;
-}
-
-/* Movies Section */
-.movies-section {
-    text-align: center;
-    padding: 40px 20px;
-    background-color: #fff;
-}
-
-.movies-section h2 {
-    font-size: 2.5rem;
-    margin-bottom: 20px;
-}
-
-.movies-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    max-width: 1000px;
-    margin: auto;
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
     padding: 20px;
 }
-
-.movie-card {
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 15px;
-    text-align: center;
-    transition: 0.3s;
+header .navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
 }
-
-.movie-card:hover {
-    transform: scale(1.05);
-}
-
-.movie-card img {
-    width: 100%;
-    height: 300px;
-    object-fit: cover;
-    border-radius: 8px;
-}
-
-.movie-card h3 {
-    font-size: 1.5rem;
-    margin: 10px 0;
-}
-
-.movie-card p {
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 10px;
-}
-
-.movie-card .btn {
-    display: inline-block;
-    background: #007BFF;
-    color: white;
-    padding: 10px 15px;
+.navbar .logo {
+    color: #fff;
+    font-weight: 600;
+    font-size: 2.1rem;
     text-decoration: none;
-    border-radius: 5px;
-    transition: background 0.3s;
 }
-
-.movie-card .btn:hover {
-    background: #0056b3;
+.navbar .logo span {
+    color: #C06B3E;
 }
-
-/* Mobile Navigation */
+.navbar .menu-links {
+    display: flex;
+    list-style: none;
+    gap: 35px;
+}
+.navbar a {
+    color: #fff;
+    text-decoration: none;
+    transition: 0.2s ease;
+}
+.navbar a:hover {
+    color: #C06B3E;
+}
+.hero-section {
+    height: 100vh;
+    background-image: url('../images/index_img/bg.jpg');
+    background-position: center;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+}
+.hero-section .content {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    color: #fff;
+}
+.hero-section .content h2 {
+    font-size: 3rem;
+    max-width: 600px;
+    line-height: 70px;
+}
+.hero-section .content p {
+    font-weight: 300;
+    max-width: 600px;
+    margin-top: 15px;
+}
+.hero-section .content button {
+    background: #fff;
+    padding: 12px 30px;
+    border: none;
+    font-size: 1rem;
+    border-radius: 6px;
+    margin-top: 38px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.2s ease;
+}
+.hero-section .content button:hover {
+    color: #fff;
+    background: #C06B3E;
+}
+#close-menu-btn {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    cursor: pointer;
+    display: none;
+}
+#hamburger-btn {
+    color: #fff;
+    cursor: pointer;
+    display: none;
+}
 @media (max-width: 768px) {
-    .menu-links {
-        display: none;
-        flex-direction: column;
-        background-color: rgba(0, 0, 0, 0.9);
-        position: absolute;
-        top: 60px;
-        right: 0;
-        width: 200px;
-        text-align: center;
+    header {
         padding: 10px;
-        border-radius: 5px;
+    }
+    header.show-mobile-menu::before {
+        content: "";
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        backdrop-filter: blur(5px);
+    }
+    .navbar .logo {
+        font-size: 1.7rem;
     }
 
-    .menu-links li {
-        margin: 10px 0;
-    }
-
-    .show-mobile-menu .menu-links {
-        display: flex;
-    }
-
-    .material-icons {
+    #hamburger-btn, #close-menu-btn {
         display: block;
     }
+    .navbar .menu-links {
+        position: fixed;
+        top: 0;
+        left: -250px;
+        width: 250px;
+        height: 100vh;
+        background: #fff;
+        flex-direction: column;
+        padding: 70px 40px 0;
+        transition: left 0.2s ease;
+    }
+    header.show-mobile-menu .navbar .menu-links {
+        left: 0;
+    }
+    .navbar a {
+        color: #000;
+    }
+    .hero-section .content {
+        text-align: center;
+    }
+    .hero-section .content :is(h2, p) {
+        max-width: 100%;
+    }
+    .hero-section .content h2 {
+        font-size: 2.3rem;
+        line-height: 60px;
+    }
+
+    .hero-section .content button {
+        padding: 9px 18px;
+    }
+}
+.explore-btn {
+    display: block;
+    width: 50%;
+    max-width: 350px;
+    background: #f24539;
+    color: #fff;
+    text-decoration: none;
+    text-align: center;
+    padding: 14px 0;
+    border-radius: 30px;
+    margin: 60px 0 60px auto; /* Align button to the left */
+    font-size: 18px;
+    transition: all 0.4s ease;
+}
+.explore-btn:hover {
+    transform: scale(0.9);
 }
