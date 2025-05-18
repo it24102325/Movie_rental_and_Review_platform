@@ -2,7 +2,6 @@ package services;
 
 import config.AppConfig;
 import models.AdminUser;
-import models.User;
 
 import java.io.*;
 import java.util.ArrayList;

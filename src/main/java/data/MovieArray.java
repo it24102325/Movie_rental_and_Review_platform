@@ -2,7 +2,6 @@ package data;
 
 import models.Movie;
 
-//create new array class for storing data
 public class MovieArray {
     private Movie[] movies;
     private int size;
@@ -42,12 +41,12 @@ public class MovieArray {
         if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
-
+        
         // Shift elements to the left
         for (int i = index; i < size - 1; i++) {
             movies[i] = movies[i + 1];
         }
-
+        
         movies[--size] = null; // Clear the last element
     }
 
@@ -91,19 +90,19 @@ public class MovieArray {
         if (query == null || query.trim().isEmpty()) {
             return toArray();
         }
-
+        
         String searchTerm = query.toLowerCase().trim();
         MovieArray results = new MovieArray();
-
+        
         for (int i = 0; i < size; i++) {
             Movie movie = movies[i];
             if (movie.getTitle().toLowerCase().contains(searchTerm) ||
-                    movie.getGenre().toLowerCase().contains(searchTerm) ||
-                    movie.getDescription().toLowerCase().contains(searchTerm)) {
+                movie.getGenre().toLowerCase().contains(searchTerm) ||
+                movie.getDescription().toLowerCase().contains(searchTerm)) {
                 results.add(movie);
             }
         }
-
+        
         return results.toArray();
     }
 
@@ -120,4 +119,4 @@ public class MovieArray {
             }
         }
     }
-}
+} 
