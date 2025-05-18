@@ -1,266 +1,169 @@
 package services;
 
-import config.AppConfig;
 import models.Review;
+import models.User;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ReviewDao {
-    // Submit a review using Review object
-    public static boolean submitReview(Review review) {
-        if (review == null || review.getMovieId() == null || review.getUserId() == null || 
-            review.getContent() == null || review.getContent().trim().isEmpty()) {
+
+    private static final String reviewFilePath = "C:\\Users\\USER\\Desktop\\movie rental platform 1\\movie rental platform\\jacka (1)\\movie_rental_and_review_platform_05\\data\\reviews.txt";
+
+    // Add a review for a movie
+    public static boolean addReview(String movieId, String userId, String rating, String feedback) {
+        String reviewId = "RV" + System.currentTimeMillis();  // Generate a unique review ID
+        Review review = new Review(reviewId, movieId, userId, rating, feedback);
+
+        // Try to append the review to the file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(reviewFilePath, true))) {
+            writer.write(review.toFileFormat() + "\n");
+            return true;
+        } catch (IOException e) {
+            System.err.println("Error writing review: " + e.getMessage());
             return false;
         }
-
-        // Generate a new review ID if not set
-        if (review.getReviewId() == null || review.getReviewId().trim().isEmpty()) {
-            review.setReviewId("REV-" + System.currentTimeMillis());
-        }
-
-        try {
-            String filePath = AppConfig.getRealPath(AppConfig.REVIEWS_FILE);
-            File file = new File(filePath);
-            if (!file.exists()) {
-                if (file.getParentFile() != null) {
-                    file.getParentFile().mkdirs();
-                }
-                file.createNewFile();
-            }
-
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-                writer.write(review.getReviewId() + "," + review.getUserId() + "," + 
-                           review.getMovieId() + "," + review.getContent() + "," + review.getRating());
-                writer.newLine();
-                return true;
-            }
-        } catch (IOException e) {
-            System.err.println("Error submitting review: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return false;
     }
 
-    // Submit a review (legacy method)
-    public static boolean submitReview(String movieId, String userId, String content) {
-        Review review = new Review();
-        review.setMovieId(movieId);
-        review.setUserId(userId);
-        review.setContent(content);
-        review.setRating(5); // Default rating
-        return submitReview(review);
-    }
-
-    // Get reviews for a specific movie
-    public static List<Review> getReviews(String movieId) {
-        if (movieId == null) {
-            return new ArrayList<>();
-        }
-
-        List<Review> reviews = new ArrayList<>();
-        String filePath = AppConfig.getRealPath(AppConfig.REVIEWS_FILE);
-        File file = new File(filePath);
-        
-        if (!file.exists()) {
-            return reviews;
-        }
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] reviewData = line.split(",");
-                if (reviewData.length == 5 && reviewData[2].equals(movieId)) {
-                    reviews.add(new Review(reviewData[0], reviewData[1], reviewData[2], 
-                                         reviewData[3], reviewData[4]));
-                }
-            }
-        } catch (IOException e) {
-            System.err.println("Error getting reviews: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return reviews;
-    }
-
-    // Get reviews by user ID
-    public static List<Review> getUserReviews(String userId) {
-        if (userId == null) {
-            return new ArrayList<>();
-        }
-
-        List<Review> reviews = new ArrayList<>();
-        String filePath = AppConfig.getRealPath(AppConfig.REVIEWS_FILE);
-        File file = new File(filePath);
-        
-        if (!file.exists()) {
-            return reviews;
-        }
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] reviewData = line.split(",");
-                if (reviewData.length == 5 && reviewData[1].equals(userId)) {
-                    reviews.add(new Review(reviewData[0], reviewData[1], reviewData[2], 
-                                         reviewData[3], reviewData[4]));
-                }
-            }
-        } catch (IOException e) {
-            System.err.println("Error getting user reviews: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return reviews;
-    }
-
-    // Get review by ID
-    public static Review getReviewById(String reviewId) {
-        if (reviewId == null || reviewId.isEmpty()) {
-            return null;
-        }
-
-        String filePath = AppConfig.getRealPath(AppConfig.REVIEWS_FILE);
-        File file = new File(filePath);
-        if (!file.exists()) {
-            return null;
-        }
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] reviewData = line.split(",");
-                if (reviewData.length == 5 && reviewData[0].equals(reviewId)) {
-                    return new Review(reviewData[0], reviewData[1], reviewData[2], 
-                                    reviewData[3], reviewData[4]);
-                }
-            }
-        } catch (IOException e) {
-            System.err.println("Error getting review by ID: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    // Update a review with Review object
-    public static boolean updateReview(Review review) {
-        if (review == null || review.getReviewId() == null || 
-            review.getContent() == null || review.getContent().trim().isEmpty()) {
-            return false;
-        }
-
+    // Update an existing review
+    public static boolean updateReview(String reviewId, String newRating, String newFeedback) {
         List<String> reviews = new ArrayList<>();
         boolean isUpdated = false;
-        String filePath = AppConfig.getRealPath(AppConfig.REVIEWS_FILE);
-        File file = new File(filePath);
 
-        if (!file.exists()) {
-            return false;
-        }
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(reviewFilePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] reviewData = line.split(",");
-                if (reviewData[0].equals(review.getReviewId())) {
-                    reviews.add(review.getReviewId() + "," + 
-                              review.getUserId() + "," + 
-                              review.getMovieId() + "," + 
-                              review.getContent().trim() + "," + 
-                              review.getRating());
+                if (reviewData[0].equals(reviewId)) {
+                    // Update the review data
+                    reviews.add(reviewId + "," + reviewData[1] + "," + reviewData[2] + "," + newRating + "," + newFeedback);
                     isUpdated = true;
                 } else {
-                    reviews.add(line);
+                    reviews.add(line);  // Keep the original line if not the matching review
                 }
             }
         } catch (IOException e) {
-            System.err.println("Error reading reviews for update: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Error reading review file: " + e.getMessage());
             return false;
         }
 
         if (isUpdated) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
-                for (String rev : reviews) {
-                    writer.write(rev);
+            // Write the updated reviews back to the file
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(reviewFilePath, false))) {
+                for (String review : reviews) {
+                    writer.write(review);
                     writer.newLine();
                 }
                 return true;
             } catch (IOException e) {
                 System.err.println("Error writing updated review: " + e.getMessage());
-                e.printStackTrace();
+                return false;
             }
         }
-        return false;
-    }
-
-    // Get all reviews
-    public static List<Review> getAllReviews() {
-        List<Review> reviews = new ArrayList<>();
-        String filePath = AppConfig.getRealPath(AppConfig.REVIEWS_FILE);
-        File file = new File(filePath);
-        
-        if (!file.exists()) {
-            return reviews;
-        }
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] reviewData = line.split(",");
-                if (reviewData.length == 5) {
-                    reviews.add(new Review(reviewData[0], reviewData[1], reviewData[2], 
-                                         reviewData[3], reviewData[4]));
-                }
-            }
-        } catch (IOException e) {
-            System.err.println("Error getting all reviews: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return reviews;
+        return false;  // Review not found to update
     }
 
     // Delete a review
     public static boolean deleteReview(String reviewId) {
-        if (reviewId == null || reviewId.isEmpty()) {
-            return false;
-        }
-
         List<String> reviews = new ArrayList<>();
         boolean isDeleted = false;
-        String filePath = AppConfig.getRealPath(AppConfig.REVIEWS_FILE);
-        File file = new File(filePath);
 
-        if (!file.exists()) {
-            return false;
-        }
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(reviewFilePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] reviewData = line.split(",");
                 if (!reviewData[0].equals(reviewId)) {
-                    reviews.add(line);
+                    reviews.add(line);  // Add all lines except the one to be deleted
                 } else {
-                    isDeleted = true;
+                    isDeleted = true;  // Mark as deleted
                 }
             }
         } catch (IOException e) {
-            System.err.println("Error reading reviews for deletion: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Error reading review file: " + e.getMessage());
             return false;
         }
 
         if (isDeleted) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
-                for (String rev : reviews) {
-                    writer.write(rev);
+            // Write the remaining reviews back to the file
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(reviewFilePath, false))) {
+                for (String review : reviews) {
+                    writer.write(review);
                     writer.newLine();
                 }
                 return true;
             } catch (IOException e) {
-                System.err.println("Error writing reviews after deletion: " + e.getMessage());
-                e.printStackTrace();
+                System.err.println("Error writing updated reviews after deletion: " + e.getMessage());
+                return false;
             }
         }
-        return false;
+        return false;  // Review not found to delete
+    }
+
+    // Get all reviews with user information
+    public static List<Review> getAllReviews() {
+        List<Review> reviews = new ArrayList<>();
+        Map<String, User> userCache = new HashMap<>();
+        
+        try (BufferedReader reader = new BufferedReader(new FileReader(reviewFilePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] reviewData = line.split(",");
+                String userId = reviewData[2];
+                
+                // Get user information from cache or load it
+                User user = userCache.get(userId);
+                if (user == null) {
+                    user = UserDao.getUserByUsername(userId);
+                    if (user != null) {
+                        userCache.put(userId, user);
+                    }
+                }
+                
+                Review review = new Review(reviewData[0], reviewData[1], userId, reviewData[3], reviewData[4]);
+                if (user != null) {
+                    review.setUserName(user.getName());
+                }
+                reviews.add(review);
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading review file: " + e.getMessage());
+        }
+        return reviews;
+    }
+
+    // Get reviews for a specific movie with user information
+    public static List<Review> getReviewsForMovie(String movieId) {
+        List<Review> reviews = new ArrayList<>();
+        Map<String, User> userCache = new HashMap<>();
+        
+        try (BufferedReader reader = new BufferedReader(new FileReader(reviewFilePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] reviewData = line.split(",");
+                if (reviewData[1].equals(movieId)) {
+                    String userId = reviewData[2];
+                    
+                    // Get user information from cache or load it
+                    User user = userCache.get(userId);
+                    if (user == null) {
+                        user = UserDao.getUserByUsername(userId);
+                        if (user != null) {
+                            userCache.put(userId, user);
+                        }
+                    }
+                    
+                    Review review = new Review(reviewData[0], reviewData[1], userId, reviewData[3], reviewData[4]);
+                    if (user != null) {
+                        review.setUserName(user.getName());
+                    }
+                    reviews.add(review);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading review file: " + e.getMessage());
+        }
+        return reviews;
     }
 }

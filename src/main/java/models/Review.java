@@ -2,22 +2,19 @@ package models;
 
 public class Review {
     private String reviewId;
-    private String userId;
     private String movieId;
-    private String content;
-    private String rating; // e.g., "1", "2", "3", "4", "5"
-
-    // No-args constructor
-    public Review() {
-    }
+    private String userId;
+    private String rating;
+    private String feedback;
+    private String userName;
 
     // Constructor
-    public Review(String reviewId, String userId, String movieId, String content, String rating) {
+    public Review(String reviewId, String movieId, String userId, String rating, String feedback) {
         this.reviewId = reviewId;
-        this.userId = userId;
         this.movieId = movieId;
-        this.content = content;
+        this.userId = userId;
         this.rating = rating;
+        this.feedback = feedback;
     }
 
     // Getters and Setters
@@ -29,14 +26,6 @@ public class Review {
         this.reviewId = reviewId;
     }
 
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
     public String getMovieId() {
         return movieId;
     }
@@ -45,12 +34,12 @@ public class Review {
         this.movieId = movieId;
     }
 
-    public String getContent() {
-        return content;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getRating() {
@@ -61,16 +50,30 @@ public class Review {
         this.rating = rating;
     }
 
-    // Convenience methods for integer rating
-    public int getRatingAsInt() {
-        try {
-            return Integer.parseInt(rating);
-        } catch (NumberFormatException e) {
-            return 0;
-        }
+    public String getFeedback() {
+        return feedback;
     }
 
-    public void setRating(int rating) {
-        this.rating = String.valueOf(rating);
+    public void setFeedback(String feedback) {
+        this.feedback = feedback;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    // Convert review to a string format for storage (e.g., for writing to file)
+    public String toFileFormat() {
+        return this.reviewId + "," + this.movieId + "," + this.userId + "," + this.rating + "," + this.feedback;
+    }
+
+    // Static method to convert a line from file storage back into a Review object
+    public static Review fromFileFormat(String line) {
+        String[] data = line.split(",");
+        return new Review(data[0], data[1], data[2], data[3], data[4]);
     }
 }
