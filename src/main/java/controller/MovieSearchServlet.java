@@ -9,6 +9,7 @@ import services.MovieDao;
 import models.Movie;
 
 import java.io.IOException;
+import dsa.MyArrayList;
 import java.util.List;
 
 @WebServlet("/search-movie")
@@ -18,7 +19,7 @@ public class MovieSearchServlet extends HttpServlet {
         if (keyword == null) {
             keyword = "";
         }
-        List<Movie> movies = MovieDao.searchMovies(keyword);
+        MyArrayList<Movie> movies = (MyArrayList<Movie>) MovieDao.searchMovies(keyword);
         request.setAttribute("movies", movies);
         request.getRequestDispatcher("movie-list.jsp").forward(request, response);
     }

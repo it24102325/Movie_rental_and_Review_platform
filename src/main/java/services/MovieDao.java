@@ -3,8 +3,7 @@ package services;
 import models.Movie;
 import models.Review;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import dsa.MyArrayList;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -48,8 +47,8 @@ public class MovieDao {
     }
 
     // Get all movies from the file
-    public static List<Movie> getAllMovies() {
-        List<Movie> movies = new ArrayList<>();
+    public static MyArrayList<Movie> getAllMovies() {
+        MyArrayList<Movie> movies = new MyArrayList<>();
         File moviesFile = new File(filePath);
         
         if (!moviesFile.exists()) {
@@ -128,10 +127,10 @@ public class MovieDao {
         return movies;
     }
 
-    // Get a movie by ID
     public static Movie getMovieById(String id) {
-        List<Movie> movies = getAllMovies();
-        for (Movie movie : movies) {
+        MyArrayList<Movie> movies = getAllMovies();
+        for (int i = 0; i < movies.size(); i++) {
+            Movie movie = movies.get(i);
             if (movie.getId().equals(id)) {
                 return movie;
             }
@@ -140,8 +139,8 @@ public class MovieDao {
     }
 
     // Search movies by keyword in title or genre
-    public static List<Movie> searchMovies(String keyword) {
-        List<Movie> movies = new ArrayList<>();
+    public static MyArrayList<Movie> searchMovies(String keyword) {
+        MyArrayList<Movie> movies = new MyArrayList<>();
         if (keyword == null) keyword = "";
         keyword = keyword.toLowerCase();
 
@@ -161,10 +160,11 @@ public class MovieDao {
 
     // Update a movie
     public static void updateMovie(String id, String title, String genre, String description, String imageFileName, double price) throws IOException {
-        List<Movie> movies = getAllMovies();
+        MyArrayList<Movie> movies = getAllMovies();
         boolean found = false;
-        
-        for (Movie movie : movies) {
+
+        for (int i = 0; i < movies.size(); i++) {
+            Movie movie = movies.get(i);
             if (movie.getId().equals(id)) {
                 movie.setTitle(title);
                 movie.setGenre(genre);
@@ -175,28 +175,30 @@ public class MovieDao {
                 break;
             }
         }
-        
+
+
         if (!found) {
             throw new IOException("Movie not found with ID: " + id);
         }
         
         // Write updated movies back to file
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            for (Movie movie : movies) {
+            for (int i = 0; i < movies.size(); i++) {
+                Movie movie = movies.get(i);
                 writer.write(String.format("%s,%s,%s,%s,%s,%.2f\n",
-                    movie.getId(),
-                    movie.getTitle(),
-                    movie.getGenre(),
-                    movie.getDescription(),
-                    movie.getImageFileName(),
-                    movie.getPrice()));
+                        movie.getId(),
+                        movie.getTitle(),
+                        movie.getGenre(),
+                        movie.getDescription(),
+                        movie.getImageFileName(),
+                        movie.getPrice()));
             }
         }
     }
 
     // Delete a movie
     public static void deleteMovie(String movieId) {
-        List<String> movies = new ArrayList<>();
+        MyArrayList<String> movies = new MyArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -210,10 +212,18 @@ public class MovieDao {
         }
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false))) {
-            for (String movie : movies) {
-                writer.write(movie);
+            for (int i = 0; i < movies.size(); i++) {
+                Movie movie = Movie.fromFileFormat(movies.get(i));
+                writer.write(String.format("%s,%s,%s,%s,%s,%.2f",
+                        movie.getId(),
+                        movie.getTitle(),
+                        movie.getGenre(),
+                        movie.getDescription(),
+                        movie.getImageFileName(),
+                        movie.getPrice()));
                 writer.newLine();
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -221,7 +231,7 @@ public class MovieDao {
 
     // Calculate average rating for a movie
     public static double getAverageRating(String movieId) {
-        List<Review> reviews = ReviewDao.getReviewsForMovie(movieId);
+        MyArrayList<Review> reviews = ReviewDao.getReviewsForMovie(movieId);
         if (reviews.isEmpty()) {
             return 0.0;
         }
@@ -234,24 +244,26 @@ public class MovieDao {
     }
 
     // Get movies sorted by rating
-    public static List<Movie> getMoviesSortedByRating(boolean ascending) {
-        List<Movie> movies = getAllMovies();
+    public static MyArrayList<Movie> getMoviesSortedByRating(boolean ascending) {
+        MyArrayList<Movie> movies = getAllMovies();
         Map<String, Double> movieRatings = new HashMap<>();
         
         // Calculate average rating for each movie
-        for (Movie movie : movies) {
+        for (int i = 0; i < movies.size(); i++) {
+            Movie movie = movies.get(i);  // Get movie at index i
             movieRatings.put(movie.getId(), getAverageRating(movie.getId()));
         }
-        
-        // Sort movies based on their average ratings
+
+// Sort movies based on their average ratings
         movies.sort((m1, m2) -> {
-            double rating1 = movieRatings.get(m1.getId());
-            double rating2 = movieRatings.get(m2.getId());
-            return ascending ? 
-                   Double.compare(rating1, rating2) : 
-                   Double.compare(rating2, rating1);
+            double rating1 = movieRatings.get(m1.getMovieId());
+            double rating2 = movieRatings.get(m2.getMovieId());
+            return ascending ?
+                    Double.compare(rating1, rating2) :
+                    Double.compare(rating2, rating1);
         });
-        
+
+
         return movies;
     }
 }

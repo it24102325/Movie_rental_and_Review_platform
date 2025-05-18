@@ -10,7 +10,7 @@ import services.ReviewDao;
 import models.Movie;
 import models.Review;
 import java.io.IOException;
-import java.util.List;
+import dsa.MyArrayList;
 
 @WebServlet("/movie-details")
 public class MovieDetailsServlet extends HttpServlet {
@@ -33,7 +33,7 @@ public class MovieDetailsServlet extends HttpServlet {
             }
             
             // Fetch reviews for this movie
-            List<Review> reviews = ReviewDao.getReviewsForMovie(movieId);
+            MyArrayList<Review> reviews = ReviewDao.getReviewsForMovie(movieId);
             
             request.setAttribute("movie", movie);
             request.setAttribute("reviews", reviews);
