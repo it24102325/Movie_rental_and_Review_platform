@@ -1,0 +1,17 @@
+UID-05202517113329,ADMIN,Admin,admin@gmail.com,Admin.123,ADMIN
+UID-05202517120951,Test2,Test2,test2@mail.com,Test2.123,user
+UID-05202517121148,Test3,Test3,Test32@gmail.com,Test3.123,user
+UID-05202517121403,Test4,Test4,Test4@mail.com,Test4.1234,user
+UID-05202517121737,Test5,Test5,Test5@gmail.com,Test5.123,user
+TEST-USER,Test,TestUser,test@test.com,Test123,user
+TEST-USER,Test,TestUser,test@test.com,Test123,user
+TEST-USER,Test,TestUser,test@test.com,Test123,user
+TEST-USER,Test,TestUser,test@test.com,Test123,user
+TEST-USER,Test,TestUser,test@test.com,Test123,user
+UID-05202517171806,Test6,Test6,Test622@gmail.com,Test6.123,user
+TEST-USER,Test,TestUser,test@test.com,Test123,user
+TEST-USER,Test,TestUser,test@test.com,Test123,user
+UID-05202518131229,mudita,mudita,mudita123@gmail.com,Mudita123,user
+TEST-USER,Test,TestUser,test@test.com,Test123,user
+UID-05202518143206,suman,suman,suman123@gmail.com,Suman123,user
+UID-05202518162845,Bimsara,muditha1,bimsara@gmail.com,KPMBb@2004,user
