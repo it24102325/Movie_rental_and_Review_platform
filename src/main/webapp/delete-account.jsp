@@ -1,17 +1,19 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Account delete</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Account - MovieRental</title>
+    <link rel="stylesheet" href="assets/styles/delete-account.css">
 </head>
 <body>
-  <%
-    response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+<h2>Are you sure you want to delete your account?</h2>
 
-    if(session.getAttribute("user") == null){
-      response.sendRedirect("login.jsp");
-    }
-  %>
-  <h2>Your account has been deleted successfully</h2>
-  <p><a href="register.jsp">Register Again</a></p>
+<form action="delete-account" method="post">
+    <button type="submit">Yes, Delete Account</button>
+</form>
+
+<a href="profile.jsp">Cancel</a>
 </body>
 </html>

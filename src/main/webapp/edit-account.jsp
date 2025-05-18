@@ -1,31 +1,29 @@
-<%@ page import="models.User" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Edit account</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Account - MovieRental</title>
     <link rel="stylesheet" href="assets/styles/edit-account.css">
-
 </head>
 <body>
-    <%
-        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+<form action="update" method="post">
+    <h2>Edit Account</h2>
 
-        User user = (User) session.getAttribute("user");
+    <div class="input-field">
+        <input type="text" name="name" value="${sessionScope.user.name}" required>
+    </div>
 
-        if(session.getAttribute("user") == null){
-            response.sendRedirect("login.jsp");
-        }
+    <div class="input-field">
+        <input type="text" name="uname" value="${sessionScope.user.username}" required>
+    </div>
 
-    %>
-    <p>${error}</p>
-    <form action="update" method="post">
+    <div class="input-field">
+        <input type="password" name="pwd" placeholder="New Password" required>
+    </div>
 
-        Name: <input type="text" name="name" value="<%=user.getName()%>" required><br>
-        Username: <input type="text" name="uname" value="<%=user.getUsername()%>" required><br>
-        Email: <input type="email" name="email" value="<%=user.getEmail()%>" disabled><br>
-        New Password: <input type="password" name="pwd" required><br>
-        <button type="submit">Save</button>
-    </form>
-
+    <button type="submit">Update Account</button>
+</form>
 </body>
 </html>

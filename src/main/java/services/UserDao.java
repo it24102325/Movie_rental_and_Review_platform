@@ -4,146 +4,268 @@ import models.User;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-public class  UserDao {
-    public static final String filePath = "C:\\Users\\pasin\\Desktop\\movie_rental_and_review_platform\\data\\user.txt";
+public class UserDao {
 
-    //create user id
-    public static String createUserId(){
-        SimpleDateFormat sdf = new SimpleDateFormat("MMyyyyddHHmmss");
-        return "UID-"+sdf.format(new Date());
+    // Path to users' data file
+    private static final String filePath = "C:\\Users\\pasin\\Desktop\\movie_rental_and_review_platform_06\\data\\users.txt";
+
+    static {
+        // Create data directory if it doesn't exist
+        File dataDir = new File(filePath).getParentFile();
+        if (!dataDir.exists()) {
+            System.out.println("Creating data directory: " + dataDir.getAbsolutePath());
+            dataDir.mkdirs();
+        }
+
+        // Create users.txt if it doesn't exist
+        File usersFile = new File(filePath);
+        if (!usersFile.exists()) {
+            System.out.println("Creating users.txt file: " + usersFile.getAbsolutePath());
+            try {
+                usersFile.createNewFile();
+            } catch (IOException e) {
+                System.err.println("Error creating users.txt: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("users.txt exists at: " + usersFile.getAbsolutePath());
+            System.out.println("File size: " + usersFile.length() + " bytes");
+        }
     }
 
-    //password validation
-    public static String passwordValidation(String password){
+    // Create a unique user ID
+    public static String createUserId() {
+        SimpleDateFormat sdf = new SimpleDateFormat("MMyyyyddHHmmss");
+        return "UID-" + sdf.format(new java.util.Date());
+    }
+
+    // Password validation (checks length and regex for uppercase and number)
+    public static String passwordValidation(String password) {
         String regex = "^(?=.*[A-Z])(?=.*\\d).+$";
-        if(password.length() < 6){
+        if (password.length() < 6) {
             return "length";
-        }else if(!password.matches(regex)){
+        } else if (!password.matches(regex)) {
             return "regex";
         }
         return "valid";
     }
 
-    //grab all user details
-    public static void getRegisterDetails(String name, String username, String email, String password) {
-        String role = "user";
-        String userId = createUserId();
-        User user = new User(userId, name, username, email, password, role);
-        registerUser(user);
-    }
-    //register a user
-    public static void registerUser(User user) {
-        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(filePath,true))) {
-            bufferedWriter.write(user.getUserId()+","+user.getName()+","+user.getUsername()+","+user.getEmail()+","+user.getPassword()+","+user.getRole());
-            bufferedWriter.newLine();
-        }catch (IOException e){
-            e.getMessage();
+    // Register a user (create user and store in file)
+    public static void registerUser(String name, String username, String email, String password) {
+        if (isUserExist(email)) {
+            throw new IllegalArgumentException("Email already exists! Please choose a different one.");
         }
-    }
-    //check if there are exists same users
-    public static boolean isUserExist(String email){
-        try(FileReader fileReader = new FileReader(filePath)) {
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                String[] user = line.split(",");
-                if(user.length == 6 && user[3].equals(email)){
-                    return true;
-                }
-            }
-        }catch (IOException e){
-            e.getMessage();
-        }
-        return false;
-    }
-    //login
-    public static User loginUser(String username, String password){
-        try(FileReader fileReader = new FileReader(filePath)){
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                String[] user = line.split(",");
-                if(user.length == 6 && user[2].equals(username) && user[4].equals(password)){
-                    return new User(user[0], user[1], username, user[3], password, user[5]);
-                }
-            }
-        }catch (IOException e){
-            e.getMessage();
-        }
-        return null;
+
+        String userId = createUserId();  // Generate a unique user ID
+        User user = new User(userId, name, username, email, password, "user");  // Default role is "user"
+        saveUser(user);  // Save user to file
     }
 
-    //delete user account (user side)
-    public static boolean deleteUser(String email){
-
-        List<String> users = new ArrayList<>();
-        boolean isDeleted = false;
-
-        try(FileReader fileReader = new FileReader(filePath)) {
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                String[] user = line.split(",");
-                if(user[3].equals(email)){
-                    isDeleted = true;
-                }else{
-                    users.add(line);
-                }
-            }
-        }catch (IOException e){
-            e.getMessage();
-            return false;
+    // Save user to the file
+    private static void saveUser(User user) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
+            writer.write(user.toFileFormat() + "\n");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        if(isDeleted){
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-                for (String user : users) {
-                    writer.write(user);
-                    writer.newLine();
-                }
-                return true;
-            } catch (IOException e) {
-                e.getMessage();
-            }
-        }
-        return false;
     }
 
-    //update user details (user side)
-    public static boolean updateUser(String oldEmail, String newName, String newUserName, String newPassword) {
-
-        List<String> users = new ArrayList<>();
-        boolean updated = false;
-
+    // Check if a user already exists by email
+    public static boolean isUserExist(String email) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] user = line.split(",");
-                if (user[3].equals(oldEmail)) {
-                    users.add(user[0] + "," + newName + "," + newUserName +","+oldEmail+","+newPassword + ","+user[5]);
-                    updated = true;
-                } else {
-                    users.add(line);
+                if (user[3].equals(email)) {
+                    return true;  // Email exists
                 }
             }
         } catch (IOException e) {
-            e.getMessage();
-            return false;
+            e.printStackTrace();
+        }
+        return false;  // Email doesn't exist
+    }
+
+    // Authenticate a user by username and password
+    public static User authenticateUser(String username, String password) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] user = line.split(",");
+                if (user[2].equals(username) && user[4].equals(password)) {
+                    return new User(user[0], user[1], username, user[3], user[4], user[5]);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;  // Authentication failed
+    }
+
+    // Get all users from the file
+    public static List<User> getAllUsers() {
+        List<User> users = new ArrayList<>();
+        File usersFile = new File(filePath);
+
+        if (!usersFile.exists()) {
+            System.err.println("Error: users.txt does not exist at: " + filePath);
+            return users;
         }
 
-        if (updated) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false))) {
-                for (String user : users) {
-                    writer.write(user);
-                    writer.newLine();
+        if (usersFile.length() == 0) {
+            System.out.println("Warning: users.txt is empty");
+            return users;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            System.out.println("Reading users from file: " + filePath);
+            String line;
+            int lineNumber = 0;
+
+            while ((line = reader.readLine()) != null) {
+                lineNumber++;
+                System.out.println("Reading line " + lineNumber + ": " + line);
+
+                if (line.trim().isEmpty()) {
+                    System.out.println("Skipping empty line " + lineNumber);
+                    continue;
                 }
-            } catch (IOException e) {
-                e.getMessage();
-                return false;
+
+                String[] userData = line.split(",");
+                System.out.println("Line " + lineNumber + " has " + userData.length + " fields");
+
+                if (userData.length == 6) {
+                    // Format: userId,name,username,email,password,role
+                    User user = new User(
+                            userData[0].trim(),  // userId
+                            userData[1].trim(),  // name
+                            userData[2].trim(),  // username
+                            userData[3].trim(),  // email
+                            userData[4].trim(),  // password
+                            userData[5].trim()   // role
+                    );
+                    System.out.println("Created user object: " + user.getUsername());
+                    users.add(user);
+                } else {
+                    System.err.println("Invalid user data format at line " + lineNumber +
+                            ". Expected 6 fields, got " + userData.length);
+                }
+            }
+            System.out.println("Total users loaded: " + users.size());
+        } catch (IOException e) {
+            System.err.println("Error reading users file: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return users;
+    }
+
+    // Get user by username
+    public static User getUserByUsername(String username) {
+        List<User> users = getAllUsers();
+        for (User user : users) {
+            if (user.getUsername().equals(username)) {
+                return user;
             }
         }
-        return updated;
+        return null;
+    }
+
+    // Update user details
+    public static void updateUser(String username, String email, String password, String role) throws IOException {
+        List<User> users = getAllUsers();
+        boolean found = false;
+
+        for (User user : users) {
+            if (user.getUsername().equals(username)) {
+                user.setEmail(email);
+                if (password != null && !password.trim().isEmpty()) {
+                    user.setPassword(password);
+                }
+                user.setRole(role);
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            throw new IOException("User not found with username: " + username);
+        }
+
+        // Write updated users back to file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            for (User user : users) {
+                writer.write(String.format("%s,%s,%s,%s,%s,%s\n",
+                        user.getUserId(),
+                        user.getName(),
+                        user.getUsername(),
+                        user.getEmail(),
+                        user.getPassword(),
+                        user.getRole()));
+            }
+        }
+    }
+
+    // Delete user
+    public static void deleteUser(String username) throws IOException {
+        List<User> users = getAllUsers();
+        boolean found = false;
+
+        for (int i = 0; i < users.size(); i++) {
+            if (users.get(i).getUsername().equals(username)) {
+                users.remove(i);
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            throw new IOException("User not found with username: " + username);
+        }
+
+        // Write updated users back to file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            for (User user : users) {
+                writer.write(String.format("%s,%s,%s,%s,%s,%s\n",
+                        user.getUserId(),
+                        user.getName(),
+                        user.getUsername(),
+                        user.getEmail(),
+                        user.getPassword(),
+                        user.getRole()));
+            }
+        }
+    }
+
+    // Test method to verify file writing
+    public static void testFileWriting() {
+        try {
+            File usersFile = new File(filePath);
+            System.out.println("Testing file writing...");
+            System.out.println("File exists: " + usersFile.exists());
+            System.out.println("File path: " + usersFile.getAbsolutePath());
+            System.out.println("File size: " + usersFile.length() + " bytes");
+            System.out.println("File can read: " + usersFile.canRead());
+            System.out.println("File can write: " + usersFile.canWrite());
+
+            // Try to write a test line
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
+                writer.write("TEST-USER,Test,TestUser,test@test.com,Test123,user\n");
+                System.out.println("Test line written successfully");
+            }
+
+            // Read back the file
+            try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+                String line;
+                System.out.println("\nFile contents:");
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error in testFileWriting: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

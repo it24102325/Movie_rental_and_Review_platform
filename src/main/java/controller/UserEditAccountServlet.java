@@ -2,54 +2,51 @@ package controller;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import models.User;
+import jakarta.servlet.http.*;
 import services.UserDao;
-
+import models.User;
 import java.io.IOException;
 
-@WebServlet("/update")
+@WebServlet("/edit-account")
 public class UserEditAccountServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
         HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
 
-        if (session != null && session.getAttribute("user") != null) {
+        // Get the logged-in user
+        User loggedInUser = (User) session.getAttribute("user");
+        String username = loggedInUser.getUsername();
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+        String role = loggedInUser.getRole(); // Keep the same role
 
-            User oldUser = (User) session.getAttribute("user");
+        if (email == null || email.trim().isEmpty()) {
+            request.setAttribute("error", "Email is required.");
+            request.getRequestDispatcher("profile.jsp").forward(request, response);
+            return;
+        }
 
-            String newName = request.getParameter("name");
-            String newUserName = request.getParameter("uname");
-            String newPassword = request.getParameter("pwd");
-
-            boolean isLengthError = UserDao.passwordValidation(newPassword).contains("length");
-            boolean isRegexError = UserDao.passwordValidation(newPassword).contains("regex");
-
-            if(isLengthError){
-                request.setAttribute("error","Password should be at least 6 characters");
-                doGet(request,response);
-            }else if(isRegexError){
-                request.setAttribute("error","Password must contain at least one uppercase letter and one number.");
-                doGet(request,response);
-            }else{
-                boolean isUpdated = UserDao.updateUser(oldUser.getEmail(), newName, newUserName, newPassword);
-
-                if (isUpdated) {
-                    User updateUser = new User(oldUser.getUserId(), newName, newUserName, oldUser.getEmail(), newPassword, oldUser.getRole());
-                    session.setAttribute("user", updateUser);
-                    response.sendRedirect("index.jsp?success=Account updated successfully!");
-                }else{
-                    request.setAttribute("error", "Failed to update account.");
-                    doGet(request, response);
-                }
+        try {
+            UserDao.updateUser(username, email, password, role);
+            // Update the session with new user details
+            loggedInUser.setEmail(email);
+            if (password != null && !password.trim().isEmpty()) {
+                loggedInUser.setPassword(password);
             }
+            session.setAttribute("user", loggedInUser);
 
+            request.setAttribute("success", "Account updated successfully!");
+            request.getRequestDispatcher("profile.jsp").forward(request, response);
+        } catch (IOException e) {
+            request.setAttribute("error", "Failed to update account: " + e.getMessage());
+            request.getRequestDispatcher("profile.jsp").forward(request, response);
         }
     }
+
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        getServletContext().getRequestDispatcher("edit-account").forward(request, response);
+        getServletContext().getRequestDispatcher("edit-account.jsp").forward(request, response);
     }
 }
