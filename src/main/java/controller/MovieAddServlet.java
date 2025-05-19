@@ -8,9 +8,10 @@ import services.MovieDao;
 import models.Movie;
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.UUID;
-import dsa.MyArrayList;
 
 @WebServlet("/add-movie")
 @MultipartConfig(
@@ -99,7 +100,7 @@ public class MovieAddServlet extends HttpServlet {
         }
 
         // Get updated movie list
-        MyArrayList<Movie> movies = (MyArrayList<Movie>) MovieDao.getAllMovies();
+        List<Movie> movies = MovieDao.getAllMovies();
         request.setAttribute("movies", movies);
         request.getRequestDispatcher("manage-movies.jsp").forward(request, response);
     }
@@ -119,7 +120,7 @@ public class MovieAddServlet extends HttpServlet {
         }
 
         // Get all movies
-        MyArrayList<Movie> movies = (MyArrayList<Movie>) MovieDao.getAllMovies();
+        List<Movie> movies = MovieDao.getAllMovies();
         request.setAttribute("movies", movies);
         request.getRequestDispatcher("manage-movies.jsp").forward(request, response);
     }

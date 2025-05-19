@@ -3,17 +3,18 @@ package services;
 import models.Movie;
 import models.Review;
 import java.io.*;
-import dsa.MyArrayList;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
 public class MovieDao {
     // Path to movies' data file
-    private static final String filePath = "C:\\Users\\theni\\Downloads\\movie rental platform\\jacka (1)\\movie_rental_and_review_platform_05\\data\\movies.txt";
+    private static final String filePath = "C:\\Users\\Muditha\\Desktop\\jacka (1)\\jacka (1)\\movie_rental_and_review_platform_05\\data\\movies.txt";
 
     static {
         // Create data directory if it doesn't exist
-        File dataDir = new File("C:\\Users\\theni\\Downloads\\movie rental platform\\jacka (1)\\movie_rental_and_review_platform_05\\data\\movies.txt");
+        File dataDir = new File("C:\\Users\\Muditha\\Desktop\\jacka (1)\\jacka (1)\\movie_rental_and_review_platform_05\\data\\movies.text");
         if (!dataDir.exists()) {
             dataDir.mkdirs();
         }
@@ -47,8 +48,8 @@ public class MovieDao {
     }
 
     // Get all movies from the file
-    public static MyArrayList<Movie> getAllMovies() {
-        MyArrayList<Movie> movies = new MyArrayList<>();
+    public static List<Movie> getAllMovies() {
+        List<Movie> movies = new ArrayList<>();
         File moviesFile = new File(filePath);
         
         if (!moviesFile.exists()) {
@@ -127,10 +128,10 @@ public class MovieDao {
         return movies;
     }
 
+    // Get a movie by ID
     public static Movie getMovieById(String id) {
-        MyArrayList<Movie> movies = getAllMovies();
-        for (int i = 0; i < movies.size(); i++) {
-            Movie movie = movies.get(i);
+        List<Movie> movies = getAllMovies();
+        for (Movie movie : movies) {
             if (movie.getId().equals(id)) {
                 return movie;
             }
@@ -139,8 +140,8 @@ public class MovieDao {
     }
 
     // Search movies by keyword in title or genre
-    public static MyArrayList<Movie> searchMovies(String keyword) {
-        MyArrayList<Movie> movies = new MyArrayList<>();
+    public static List<Movie> searchMovies(String keyword) {
+        List<Movie> movies = new ArrayList<>();
         if (keyword == null) keyword = "";
         keyword = keyword.toLowerCase();
 
@@ -160,11 +161,10 @@ public class MovieDao {
 
     // Update a movie
     public static void updateMovie(String id, String title, String genre, String description, String imageFileName, double price) throws IOException {
-        MyArrayList<Movie> movies = getAllMovies();
+        List<Movie> movies = getAllMovies();
         boolean found = false;
-
-        for (int i = 0; i < movies.size(); i++) {
-            Movie movie = movies.get(i);
+        
+        for (Movie movie : movies) {
             if (movie.getId().equals(id)) {
                 movie.setTitle(title);
                 movie.setGenre(genre);
@@ -175,30 +175,28 @@ public class MovieDao {
                 break;
             }
         }
-
-
+        
         if (!found) {
             throw new IOException("Movie not found with ID: " + id);
         }
         
         // Write updated movies back to file
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            for (int i = 0; i < movies.size(); i++) {
-                Movie movie = movies.get(i);
+            for (Movie movie : movies) {
                 writer.write(String.format("%s,%s,%s,%s,%s,%.2f\n",
-                        movie.getId(),
-                        movie.getTitle(),
-                        movie.getGenre(),
-                        movie.getDescription(),
-                        movie.getImageFileName(),
-                        movie.getPrice()));
+                    movie.getId(),
+                    movie.getTitle(),
+                    movie.getGenre(),
+                    movie.getDescription(),
+                    movie.getImageFileName(),
+                    movie.getPrice()));
             }
         }
     }
 
     // Delete a movie
     public static void deleteMovie(String movieId) {
-        MyArrayList<String> movies = new MyArrayList<>();
+        List<String> movies = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -212,18 +210,10 @@ public class MovieDao {
         }
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false))) {
-            for (int i = 0; i < movies.size(); i++) {
-                Movie movie = Movie.fromFileFormat(movies.get(i));
-                writer.write(String.format("%s,%s,%s,%s,%s,%.2f",
-                        movie.getId(),
-                        movie.getTitle(),
-                        movie.getGenre(),
-                        movie.getDescription(),
-                        movie.getImageFileName(),
-                        movie.getPrice()));
+            for (String movie : movies) {
+                writer.write(movie);
                 writer.newLine();
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -231,7 +221,7 @@ public class MovieDao {
 
     // Calculate average rating for a movie
     public static double getAverageRating(String movieId) {
-        MyArrayList<Review> reviews = ReviewDao.getReviewsForMovie(movieId);
+        List<Review> reviews = ReviewDao.getReviewsForMovie(movieId);
         if (reviews.isEmpty()) {
             return 0.0;
         }
@@ -244,26 +234,24 @@ public class MovieDao {
     }
 
     // Get movies sorted by rating
-    public static MyArrayList<Movie> getMoviesSortedByRating(boolean ascending) {
-        MyArrayList<Movie> movies = getAllMovies();
+    public static List<Movie> getMoviesSortedByRating(boolean ascending) {
+        List<Movie> movies = getAllMovies();
         Map<String, Double> movieRatings = new HashMap<>();
         
         // Calculate average rating for each movie
-        for (int i = 0; i < movies.size(); i++) {
-            Movie movie = movies.get(i);  // Get movie at index i
+        for (Movie movie : movies) {
             movieRatings.put(movie.getId(), getAverageRating(movie.getId()));
         }
-
-// Sort movies based on their average ratings
+        
+        // Sort movies based on their average ratings
         movies.sort((m1, m2) -> {
-            double rating1 = movieRatings.get(m1.getMovieId());
-            double rating2 = movieRatings.get(m2.getMovieId());
-            return ascending ?
-                    Double.compare(rating1, rating2) :
-                    Double.compare(rating2, rating1);
+            double rating1 = movieRatings.get(m1.getId());
+            double rating2 = movieRatings.get(m2.getId());
+            return ascending ? 
+                   Double.compare(rating1, rating2) : 
+                   Double.compare(rating2, rating1);
         });
-
-
+        
         return movies;
     }
 }

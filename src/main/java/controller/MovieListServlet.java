@@ -6,7 +6,6 @@ import jakarta.servlet.http.*;
 import services.MovieDao;
 import models.Movie;
 import java.io.IOException;
-import dsa.MyArrayList;
 import java.util.List;
 
 @WebServlet("/movie-list")
@@ -16,21 +15,21 @@ public class MovieListServlet extends HttpServlet {
         System.out.println("MovieListServlet: Starting to fetch movies...");
         
         try {
-            MyArrayList<Movie> movies;
+            List<Movie> movies;
             String sortBy = request.getParameter("sort");
             
             if ("rating_asc".equals(sortBy)) {
-                movies = (MyArrayList<Movie>) MovieDao.getMoviesSortedByRating(true);
+                movies = MovieDao.getMoviesSortedByRating(true);
             } else if ("rating_desc".equals(sortBy)) {
-                movies = (MyArrayList<Movie>) MovieDao.getMoviesSortedByRating(false);
+                movies = MovieDao.getMoviesSortedByRating(false);
             } else {
-                movies = (MyArrayList<Movie>) MovieDao.getAllMovies();
+                movies = MovieDao.getAllMovies();
             }
             
             System.out.println("MovieListServlet: Found " + movies.size() + " movies");
             
             // Debug: Print each movie's details
-            for (Movie movie : MyArrayList) {
+            for (Movie movie : movies) {
                 System.out.println("Movie: " + movie.getTitle() + 
                                  ", ID: " + movie.getId() + 
                                  ", Genre: " + movie.getGenre() + 
